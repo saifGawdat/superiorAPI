@@ -90,6 +90,11 @@ func Analyze(in AnalysisInput) Analysis {
 	if findings == nil {
 		findings = []Finding{}
 	}
+	for i := range findings {
+		if findings[i].PossibleCauses == nil {
+			findings[i].PossibleCauses = []string{} // the contract promises an array, never null
+		}
+	}
 
 	return Analysis{
 		Verdict:  verdict(findings),

@@ -1,6 +1,7 @@
 package bench
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
@@ -177,6 +178,23 @@ func TestAnalyzeNotes(t *testing.T) {
 	for _, want := range []string{"region: test", "Fewer than 20 responses", "cancelled after 10 of 10"} {
 		if !strings.Contains(all, want) {
 			t.Errorf("notes missing %q:\n%s", want, all)
+		}
+	}
+}
+
+// The web UI relies on possibleCauses always being a JSON array.
+func TestFindingsNeverSerializeNullCauses(t *testing.T) {
+	for _, results := range [][]RequestResult{
+		gen(50, func(i int) (float64, int) { return 80, 200 }),
+		gen(10, func(int) (float64, int) { return 10000, 0 }),
+		gen(30, func(int) (float64, int) { return 50, 404 }),
+	} {
+		b, err := json.Marshal(analyze(results, 2, StopCompleted))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(b), `"possibleCauses":null`) {
+			t.Errorf("null possibleCauses in %s", b)
 		}
 	}
 }
