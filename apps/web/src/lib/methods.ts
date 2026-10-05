@@ -7,11 +7,9 @@ const METHOD_BG: Record<HttpMethod, string> = {
   PUT: "bg-method-put",
   PATCH: "bg-method-patch",
   DELETE: "bg-method-delete",
-  HEAD: "bg-method-other",
-  OPTIONS: "bg-method-other",
 };
 
-/** Background class for an HTTP method; unknown methods fall back to ink. */
+/** Background class for an HTTP method; any other method gets slate. */
 export function methodBg(method: string): string {
-  return METHOD_BG[method as HttpMethod] ?? "bg-ink";
+  return METHOD_BG[method as HttpMethod] ?? "bg-method-other";
 }

@@ -1,15 +1,7 @@
 // Contract types for the superiorAPI backend. Field names match the JSON
 // exactly; all durations are milliseconds (float, 0.1 precision).
 
-export const HTTP_METHODS = [
-  "GET",
-  "POST",
-  "PUT",
-  "PATCH",
-  "DELETE",
-  "HEAD",
-  "OPTIONS",
-] as const;
+export const HTTP_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
 
 export type HttpMethod = (typeof HTTP_METHODS)[number];
 

@@ -3,8 +3,8 @@
 import type { FormEvent } from "react";
 import type { FieldErrors, FormValues } from "@/lib/form";
 import { formatNumber } from "@/lib/format";
-import { methodBg } from "@/lib/methods";
-import { HTTP_METHODS, type HttpMethod, type Limits } from "@/lib/types";
+import type { Limits } from "@/lib/types";
+import { MethodPicker } from "./MethodPicker";
 import { RequestOptions } from "./RequestOptions";
 import { Button, FieldError } from "./ui";
 
@@ -43,31 +43,22 @@ export function ConfigForm({
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-10">
       <div>
-        <label htmlFor="url" className="mb-2 block text-sm font-semibold text-ink-2">
-          Endpoint
-        </label>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <label htmlFor="url" className="text-sm font-semibold text-ink-2">
+            Endpoint
+          </label>
+          <MethodPicker
+            value={values.method}
+            onChange={(method) => onChange({ method })}
+            invalid={Boolean(errors.method)}
+            describedBy={describedBy(errors.method && "method-error")}
+          />
+        </div>
         <div
-          className={`flex flex-col overflow-hidden rounded-lg border-2 bg-white transition-colors focus-within:border-pen sm:flex-row ${
-            errors.url || errors.method ? "border-fail" : "border-ink"
+          className={`overflow-hidden rounded-xl border-2 bg-white shadow-sm transition-colors focus-within:border-pen ${
+            errors.url ? "border-fail" : "border-ink"
           }`}
         >
-          <label htmlFor="method" className="sr-only">
-            HTTP method
-          </label>
-          <select
-            id="method"
-            value={values.method}
-            onChange={(e) => onChange({ method: e.target.value as HttpMethod })}
-            aria-invalid={Boolean(errors.method)}
-            aria-describedby={describedBy(errors.method && "method-error")}
-            className={`cursor-pointer border-b-2 border-ink/10 px-4 py-3 text-base font-bold tracking-wide text-white font-stretch-semi-expanded transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-inset sm:border-b-0 sm:py-0 ${methodBg(values.method)}`}
-          >
-            {HTTP_METHODS.map((m) => (
-              <option key={m} value={m} className={`text-white ${methodBg(m)}`}>
-                {m}
-              </option>
-            ))}
-          </select>
           <input
             id="url"
             type="url"
@@ -79,7 +70,7 @@ export function ConfigForm({
             onChange={(e) => onChange({ url: e.target.value })}
             aria-invalid={Boolean(errors.url)}
             aria-describedby={describedBy(errors.url && "url-error")}
-            className="min-w-0 flex-1 bg-transparent px-4 py-4 text-lg text-ink outline-none placeholder:text-ink-3/70 focus-visible:outline-none sm:text-xl"
+            className="w-full bg-transparent px-4 py-4 text-lg text-ink outline-none placeholder:text-ink-3/70 focus-visible:outline-none sm:text-xl"
           />
         </div>
         <FieldError id="url-error" message={errors.url} />
