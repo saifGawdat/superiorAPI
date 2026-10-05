@@ -61,10 +61,10 @@ func Percentile(sorted []float64, p float64) float64 {
 	return sorted[min(max(rank, 1), n)-1]
 }
 
-// responseDurations returns the sorted durations of requests that received an
+// ResponseDurations returns the sorted durations of requests that received an
 // HTTP response. Transport errors are excluded: their duration is mostly the
 // timeout or the time to fail, not the API's latency.
-func responseDurations(results []RequestResult) []float64 {
+func ResponseDurations(results []RequestResult) []float64 {
 	d := make([]float64, 0, len(results))
 	for _, r := range results {
 		if r.Status != 0 {
@@ -113,7 +113,7 @@ func Summarize(results []RequestResult, total int, elapsed time.Duration) Summar
 		s.SlowestRequest = &SlowestRequest{N: slowest.N, DurationMs: slowest.DurationMs, Status: slowest.Status}
 	}
 
-	d := responseDurations(results)
+	d := ResponseDurations(results)
 	s.LatencySampleSize = len(d)
 	if len(d) > 0 {
 		var sum float64
@@ -182,10 +182,10 @@ func niceStep(raw float64) float64 {
 	return 10 * exp
 }
 
-// livePercentiles returns P50 and P95 of the responses so far, or nils when
+// LivePercentiles returns P50 and P95 of the responses so far, or nils when
 // no response has arrived yet.
-func livePercentiles(results []RequestResult) (p50, p95 *float64) {
-	d := responseDurations(results)
+func LivePercentiles(results []RequestResult) (p50, p95 *float64) {
+	d := ResponseDurations(results)
 	if len(d) == 0 {
 		return nil, nil
 	}
