@@ -18,6 +18,12 @@ export function formatClock(ms: number): string {
   return `${m}m ${String(s).padStart(2, "0")}s`;
 }
 
+/** Axis label for a time offset: "0s", "2.5s", "1m 05s". */
+export function formatSeconds(ms: number): string {
+  if (ms >= 60000) return formatClock(ms);
+  return `${Number((ms / 1000).toFixed(1))}s`;
+}
+
 export function formatPercent(fraction: number, digits = 1): string {
   if (!Number.isFinite(fraction)) return "–";
   const pct = fraction * 100;

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Banner } from "@/components/Banner";
 import { ConfigForm } from "@/components/ConfigForm";
+import { RunView } from "@/components/RunView";
 import { Button } from "@/components/ui";
 import { API_URL, fetchLimits, isApiError, startTest } from "@/lib/api";
 import {
@@ -12,11 +13,17 @@ import {
   type FieldErrors,
   type FormValues,
 } from "@/lib/form";
-import { DEFAULT_LIMITS, type Limits, type StartTestRequest } from "@/lib/types";
+import {
+  DEFAULT_LIMITS,
+  type Limits,
+  type StartTestRequest,
+  type TestResult,
+} from "@/lib/types";
 
 type Phase =
   | { name: "config" }
-  | { name: "running"; testId: string; request: StartTestRequest };
+  | { name: "running"; testId: string; request: StartTestRequest }
+  | { name: "report"; result: TestResult; request: StartTestRequest };
 
 interface Notice {
   title: string;
@@ -88,6 +95,15 @@ export default function Home() {
     }
   };
 
+  const finishRun = useCallback((result: TestResult) => {
+    setPhase((current) =>
+      current.name === "running" ? { name: "report", result, request: current.request } : current,
+    );
+    window.scrollTo({ top: 0 });
+  }, []);
+
+  const backToConfig = useCallback(() => setPhase({ name: "config" }), []);
+
   const submit = () => {
     const { request, errors: found } = buildRequest(values, limits);
     setErrors(found);
@@ -150,8 +166,16 @@ export default function Home() {
               onExample={() => change(EXAMPLE_VALUES)}
             />
           </section>
+        ) : phase.name === "running" ? (
+          <RunView
+            key={phase.testId}
+            testId={phase.testId}
+            request={phase.request}
+            onDone={finishRun}
+            onBack={backToConfig}
+          />
         ) : (
-          <p>Test {phase.testId} started.</p>
+          <p>Report for {phase.result.id}</p>
         )}
       </main>
     </div>
