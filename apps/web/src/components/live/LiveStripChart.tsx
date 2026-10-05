@@ -16,7 +16,7 @@ interface Props {
   host: string;
 }
 
-const PAD = { top: 18, right: 64, bottom: 28, left: 48 };
+const PAD = { top: 18, right: 14, bottom: 28, left: 48 };
 
 /**
  * A chart-recorder strip: every response lands as a dot at the moment it
@@ -97,10 +97,6 @@ export function LiveStripChart({
               opacity={0.35}
             />
 
-            {/* percentile guides */}
-            {p50 != null ? <GuideLine y={y(Math.min(p50, yMax))} x1={PAD.left} x2={PAD.left + innerW} label={`P50 ${formatMs(p50)}`} /> : null}
-            {p95 != null ? <GuideLine y={y(Math.min(p95, yMax))} x1={PAD.left} x2={PAD.left + innerW} label={`P95 ${formatMs(p95)}`} dashed /> : null}
-
             {/* dots */}
             {samples.map((s, i) => {
               const off = s.durationMs > yMax;
@@ -116,6 +112,10 @@ export function LiveStripChart({
                 </g>
               );
             })}
+
+            {/* percentile guides */}
+            {p50 != null ? <GuideLine y={y(Math.min(p50, yMax))} x1={PAD.left} x2={PAD.left + innerW} label={`P50 ${formatMs(p50)}`} placement="below" /> : null}
+            {p95 != null ? <GuideLine y={y(Math.min(p95, yMax))} x1={PAD.left} x2={PAD.left + innerW} label={`P95 ${formatMs(p95)}`} dashed /> : null}
 
             {/* pen head */}
             {!finished ? (

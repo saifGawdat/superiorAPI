@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Banner } from "@/components/Banner";
 import { ConfigForm } from "@/components/ConfigForm";
 import { ReportView } from "@/components/report/ReportView";
@@ -39,6 +39,14 @@ export default function Home() {
   const [limits, setLimits] = useState<Limits>(DEFAULT_LIMITS);
   const [backendDown, setBackendDown] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const shownPhase = useRef(phase.name);
+
+  // Move focus to the new view's heading so keyboard and screen reader users follow along.
+  useEffect(() => {
+    if (shownPhase.current === phase.name) return;
+    shownPhase.current = phase.name;
+    document.getElementById(`${phase.name}-title`)?.focus({ preventScroll: true });
+  }, [phase.name]);
 
   const loadLimits = useCallback((signal?: AbortSignal) => {
     fetchLimits(signal)
@@ -142,6 +150,7 @@ export default function Home() {
           <section aria-labelledby="config-title" className="max-w-3xl">
             <h1
               id="config-title"
+              tabIndex={-1}
               className="text-4xl leading-[1.05] font-bold tracking-tight font-stretch-expanded sm:text-5xl"
             >
               Profile an API endpoint

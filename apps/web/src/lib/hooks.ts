@@ -41,7 +41,16 @@ export function useAnimatedNumber(target: number | null, duration = 450): number
       if (t < 1) frame = requestAnimationFrame(step);
     };
     frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
+    // Frames are throttled in background tabs; never leave a stale number.
+    const snap = setTimeout(() => {
+      cancelAnimationFrame(frame);
+      current.current = target;
+      setShown(target);
+    }, duration + 120);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(snap);
+    };
   }, [target, duration, reduced]);
 
   if (reduced || target == null || shown == null) return target;

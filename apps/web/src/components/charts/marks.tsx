@@ -32,19 +32,24 @@ export function LatencyMark({ ok, offScale }: { ok: boolean; offScale: boolean }
   );
 }
 
-/** Horizontal percentile guide with a right-hand label. */
+/**
+ * Horizontal percentile guide. The label sits inside the plot at the right
+ * end, above or below the line, so P50 (below) and P95 (above) never collide.
+ */
 export function GuideLine({
   y,
   x1,
   x2,
   label,
   dashed,
+  placement = "above",
 }: {
   y: number;
   x1: number;
   x2: number;
   label: string;
   dashed?: boolean;
+  placement?: "above" | "below";
 }) {
   return (
     <g
@@ -58,7 +63,16 @@ export function GuideLine({
         strokeWidth={1.25}
         strokeDasharray={dashed ? "5 4" : undefined}
       />
-      <text x={x2 + 6} dy="0.32em" className="fill-ink-2 text-[11px] font-semibold">
+      <text
+        x={x2 - 4}
+        dy={placement === "above" ? -5 : 13}
+        textAnchor="end"
+        stroke="var(--color-panel)"
+        strokeWidth={3}
+        paintOrder="stroke"
+        strokeLinejoin="round"
+        className="fill-ink text-[11px] font-semibold"
+      >
         {label}
       </text>
     </g>

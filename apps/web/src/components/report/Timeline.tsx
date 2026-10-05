@@ -6,7 +6,7 @@ import { useElementWidth } from "@/lib/hooks";
 import type { LatencyStats, RequestSample } from "@/lib/types";
 import { GuideLine, LatencyMark } from "../charts/marks";
 
-const PAD = { top: 22, right: 70, bottom: 28, left: 48 };
+const PAD = { top: 22, right: 14, bottom: 28, left: 48 };
 const HEIGHT = 280;
 
 /** Every request: when it started (x) against how long it took (y). */
@@ -27,6 +27,7 @@ export function Timeline({
   const innerH = HEIGHT - PAD.top - PAD.bottom;
   const x = linear(0, xMax, PAD.left, PAD.left + innerW);
   const y = linear(0, yMax, PAD.top + innerH, PAD.top);
+  const x2 = PAD.left + innerW;
 
   return (
     <>
@@ -44,34 +45,61 @@ export function Timeline({
           >
             {ticks(yMax, 4).map((t) => (
               <g key={`y${t}`}>
-                <line x1={PAD.left} x2={PAD.left + innerW} y1={y(t)} y2={y(t)} stroke="var(--color-rule)" />
-                <text x={PAD.left - 8} y={y(t)} dy="0.32em" textAnchor="end" className="fill-ink-3 text-[11px]">
+                <line x1={PAD.left} x2={x2} y1={y(t)} y2={y(t)} stroke="var(--color-rule)" />
+                <text
+                  x={PAD.left - 8}
+                  y={y(t)}
+                  dy="0.32em"
+                  textAnchor="end"
+                  className="fill-ink-3 text-[11px]"
+                >
                   {formatMs(t)}
                 </text>
               </g>
             ))}
             {ticks(xMax, width < 520 ? 3 : 6).map((t) => (
-              <text key={`x${t}`} x={x(t)} y={HEIGHT - 8} textAnchor="middle" className="fill-ink-3 text-[11px]">
+              <text
+                key={`x${t}`}
+                x={x(t)}
+                y={HEIGHT - 8}
+                textAnchor="middle"
+                className="fill-ink-3 text-[11px]"
+              >
                 {formatSeconds(t)}
               </text>
             ))}
 
-            {latency ? (
-              <>
-                <GuideLine y={y(Math.min(latency.p50, yMax))} x1={PAD.left} x2={PAD.left + innerW} label={`P50 ${formatMs(latency.p50)}`} />
-                <GuideLine y={y(Math.min(latency.p95, yMax))} x1={PAD.left} x2={PAD.left + innerW} label={`P95 ${formatMs(latency.p95)}`} dashed />
-              </>
-            ) : null}
-
             {requests.map((r) => {
               const off = r.durationMs > yMax;
+              const cy = off ? PAD.top - 9 : y(r.durationMs);
               return (
-                <g key={r.n} transform={`translate(${x(r.startOffsetMs)} ${off ? PAD.top - 9 : y(r.durationMs)})`}>
-                  <title>{`#${r.n} started at ${formatSeconds(r.startOffsetMs)}: ${formatMs(r.durationMs)}, ${outcomeLabel(r.status, r.error)}`}</title>
+                <g key={r.n} transform={`translate(${x(r.startOffsetMs)} ${cy})`}>
+                  <title>
+                    {`#${r.n} started at ${formatSeconds(r.startOffsetMs)}: ${formatMs(r.durationMs)}, ${outcomeLabel(r.status, r.error)}`}
+                  </title>
                   <LatencyMark ok={r.ok} offScale={off} />
                 </g>
               );
             })}
+
+            {latency ? (
+              <>
+                <GuideLine
+                  y={y(Math.min(latency.p50, yMax))}
+                  x1={PAD.left}
+                  x2={x2}
+                  label={`P50 ${formatMs(latency.p50)}`}
+                  placement="below"
+                />
+                <GuideLine
+                  y={y(Math.min(latency.p95, yMax))}
+                  x1={PAD.left}
+                  x2={x2}
+                  label={`P95 ${formatMs(latency.p95)}`}
+                  dashed
+                />
+              </>
+            ) : null}
           </svg>
         ) : null}
       </div>

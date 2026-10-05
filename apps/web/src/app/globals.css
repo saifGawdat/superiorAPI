@@ -98,6 +98,11 @@ body {
   outline-offset: 2px;
 }
 
+/* Headings that receive programmatic focus on view changes. */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
 /* Grid paper for chart panels: minor lines every 12px, major every 60px. */
 .chart-paper {
   background-color: var(--color-panel);

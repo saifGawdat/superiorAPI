@@ -70,9 +70,20 @@ function reducer(state: RunState, action: Action): RunState {
     }
     case "done": {
       const progress = action.result.progress ?? state.progress;
+      const merged = progress ? mergeRecent(state, progress) : state;
+      // `recent` only holds the latest 12, so fast runs skip some requests
+      // live. The final result has all of them: fill in the gaps.
+      let samples = merged.samples;
+      const all = action.result.requests ?? [];
+      if (all.some((r) => !samples.has(r.n))) {
+        const filled = new Map(samples);
+        for (const r of all) if (!filled.has(r.n)) filled.set(r.n, r);
+        samples = filled;
+      }
       return {
         ...state,
-        ...(progress ? mergeRecent(state, progress) : {}),
+        samples,
+        feed: merged.feed,
         progress,
         receivedAt: action.at,
         result: action.result,

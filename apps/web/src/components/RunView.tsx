@@ -87,10 +87,10 @@ export function RunView({ testId, request, onDone, onBack }: Props) {
   const host = hostAndPath(request.url);
 
   return (
-    <section aria-labelledby="run-title" className="flex flex-col gap-8">
+    <section aria-labelledby="running-title" className="flex flex-col gap-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 id="run-title" className="flex min-w-0 items-center gap-2 text-lg font-semibold">
+          <h1 id="running-title" tabIndex={-1} className="flex min-w-0 items-center gap-2 text-lg font-semibold">
             <MethodTag method={request.method} />
             <span className="truncate">{host}</span>
           </h1>

@@ -43,6 +43,7 @@ export function VerdictCard({ result }: { result: TestResult }) {
       ) : null}
       <h1
         id="report-title"
+        tabIndex={-1}
         className="mt-3 max-w-[22ch] text-3xl leading-[1.1] font-bold tracking-tight font-stretch-expanded text-balance sm:text-5xl"
       >
         {analysis?.headline ?? (cancelled ? "Test cancelled" : "Test finished")}

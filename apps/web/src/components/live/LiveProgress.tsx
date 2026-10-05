@@ -102,7 +102,7 @@ function LatencyReadout({ label, value }: { label: string; value: number | null 
       <dt className="text-sm text-ink-3">{label}</dt>
       <dd className="mt-1 text-2xl font-semibold text-ink font-stretch-expanded tabular-nums">
         {animated == null ? (
-          <span className="text-ink-3">waiting</span>
+          <span className="text-base font-medium text-ink-3 font-stretch-normal">waiting…</span>
         ) : (
           <span key={Math.round(value ?? 0)} className="animate-tick">
             {formatMs(animated)}
