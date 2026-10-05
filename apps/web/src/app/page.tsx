@@ -147,7 +147,7 @@ export default function Home() {
         ) : null}
 
         {phase.name === "config" ? (
-          <section aria-labelledby="config-title" className="max-w-3xl">
+          <section aria-labelledby="config-title" className="mx-auto max-w-3xl">
             <h1
               id="config-title"
               tabIndex={-1}
