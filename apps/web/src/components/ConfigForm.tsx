@@ -3,6 +3,7 @@
 import type { FormEvent } from "react";
 import type { FieldErrors, FormValues } from "@/lib/form";
 import { formatNumber } from "@/lib/format";
+import { methodBg } from "@/lib/methods";
 import { HTTP_METHODS, type HttpMethod, type Limits } from "@/lib/types";
 import { RequestOptions } from "./RequestOptions";
 import { Button, FieldError } from "./ui";
@@ -59,10 +60,10 @@ export function ConfigForm({
             onChange={(e) => onChange({ method: e.target.value as HttpMethod })}
             aria-invalid={Boolean(errors.method)}
             aria-describedby={describedBy(errors.method && "method-error")}
-            className="cursor-pointer border-b-2 border-ink/10 bg-ink px-4 py-3 text-base font-bold tracking-wide text-paper font-stretch-semi-expanded outline-none focus-visible:bg-pen-deep sm:border-b-0 sm:py-0"
+            className={`cursor-pointer border-b-2 border-ink/10 px-4 py-3 text-base font-bold tracking-wide text-white font-stretch-semi-expanded transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-inset sm:border-b-0 sm:py-0 ${methodBg(values.method)}`}
           >
             {HTTP_METHODS.map((m) => (
-              <option key={m} value={m}>
+              <option key={m} value={m} className={`text-white ${methodBg(m)}`}>
                 {m}
               </option>
             ))}

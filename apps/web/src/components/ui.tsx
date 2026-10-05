@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
+import { methodBg } from "@/lib/methods";
 
 export function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
@@ -33,7 +34,9 @@ export function Button({ variant = "primary", className = "", ...props }: Button
 
 export function MethodTag({ method }: { method: string }) {
   return (
-    <span className="rounded-sm bg-ink px-1.5 py-0.5 text-xs font-bold tracking-wide text-paper font-stretch-semi-expanded">
+    <span
+      className={`rounded-sm px-1.5 py-0.5 text-xs font-bold tracking-wide text-white font-stretch-semi-expanded ${methodBg(method)}`}
+    >
       {method}
     </span>
   );

@@ -27,6 +27,14 @@
   --color-good-wash: #dcf1e7;
   --color-neutral: #7a8699;
 
+  /* HTTP methods, Postman's convention. All pass 5:1 or better with white text. */
+  --color-method-get: #137a50;
+  --color-method-post: #9a5b00;
+  --color-method-put: #1d63c9;
+  --color-method-patch: #7a3fc2;
+  --color-method-delete: #c4213a;
+  --color-method-other: #4b5872;
+
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
 
   --animate-row-in: row-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
