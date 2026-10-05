@@ -1,68 +1,158 @@
-import Image from "next/image";
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { Banner } from "@/components/Banner";
+import { ConfigForm } from "@/components/ConfigForm";
+import { Button } from "@/components/ui";
+import { API_URL, fetchLimits, isApiError, startTest } from "@/lib/api";
+import {
+  buildRequest,
+  EXAMPLE_VALUES,
+  INITIAL_VALUES,
+  type FieldErrors,
+  type FormValues,
+} from "@/lib/form";
+import { DEFAULT_LIMITS, type Limits, type StartTestRequest } from "@/lib/types";
+
+type Phase =
+  | { name: "config" }
+  | { name: "running"; testId: string; request: StartTestRequest };
+
+interface Notice {
+  title: string;
+  message?: string;
+}
 
 export default function Home() {
+  const [phase, setPhase] = useState<Phase>({ name: "config" });
+  const [values, setValues] = useState<FormValues>(INITIAL_VALUES);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [notice, setNotice] = useState<Notice | null>(null);
+  const [limits, setLimits] = useState<Limits>(DEFAULT_LIMITS);
+  const [backendDown, setBackendDown] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const loadLimits = useCallback((signal?: AbortSignal) => {
+    fetchLimits(signal)
+      .then((l) => {
+        setLimits(l);
+        setBackendDown(false);
+      })
+      .catch((err) => {
+        if (signal?.aborted) return;
+        if (isApiError(err) && err.kind === "network") setBackendDown(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    loadLimits(ctrl.signal);
+    return () => ctrl.abort();
+  }, [loadLimits]);
+
+  const change = (patch: Partial<FormValues>) => {
+    setValues((v) => ({ ...v, ...patch }));
+    setErrors((prev) => {
+      const next = { ...prev };
+      for (const key of Object.keys(patch)) {
+        if (key === "headersText") delete next.headers;
+        else delete next[key as keyof FieldErrors];
+      }
+      return next;
+    });
+  };
+
+  const start = async (request: StartTestRequest) => {
+    setSubmitting(true);
+    setNotice(null);
+    try {
+      const { testId } = await startTest(request);
+      setBackendDown(false);
+      setPhase({ name: "running", testId, request });
+      window.scrollTo({ top: 0 });
+    } catch (err) {
+      setPhase({ name: "config" });
+      if (!isApiError(err)) {
+        setNotice({ title: "Something went wrong starting the test." });
+      } else if (err.kind === "network") {
+        setBackendDown(true);
+      } else if (err.field) {
+        setErrors({ [err.field]: err.message });
+      } else if (err.status === 429) {
+        setNotice({ title: "The profiler is busy right now", message: err.message });
+      } else {
+        setNotice({ title: "The test didn't start", message: err.message });
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const submit = () => {
+    const { request, errors: found } = buildRequest(values, limits);
+    setErrors(found);
+    if (request) void start(request);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex min-h-full flex-1 flex-col">
+      <header className="border-b border-rule">
+        <div className="mx-auto flex w-full max-w-6xl items-baseline justify-between gap-4 px-5 py-4 sm:px-8">
+          <p className="text-lg font-bold tracking-tight font-stretch-expanded">superiorAPI</p>
+          <p className="text-sm text-ink-3">API performance profiler</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+      </header>
+
+      <main className="mx-auto w-full max-w-6xl flex-1 px-5 pt-10 pb-20 sm:px-8 sm:pt-14">
+        {backendDown ? (
+          <div className="mb-8">
+            <Banner
+              tone="error"
+              title={`Can't reach the profiler backend at ${API_URL}`}
+              action={
+                <Button variant="secondary" onClick={() => loadLimits()}>
+                  Check again
+                </Button>
+              }
+            >
+              Start the API server, or set <code className="font-semibold">NEXT_PUBLIC_API_URL</code>{" "}
+              to its address and restart the web app.
+            </Banner>
+          </div>
+        ) : null}
+
+        {phase.name === "config" ? (
+          <section aria-labelledby="config-title" className="max-w-3xl">
+            <h1
+              id="config-title"
+              className="text-4xl leading-[1.05] font-bold tracking-tight font-stretch-expanded sm:text-5xl"
+            >
+              Profile an API endpoint
+            </h1>
+            <p className="mt-4 mb-10 max-w-prose text-lg leading-relaxed text-ink-2">
+              We send real requests to your endpoint, plot every response as it lands, and tell
+              you what the latency and errors say about it.
+            </p>
+            {notice ? (
+              <div className="mb-8">
+                <Banner tone="warning" title={notice.title}>
+                  {notice.message}
+                </Banner>
+              </div>
+            ) : null}
+            <ConfigForm
+              values={values}
+              limits={limits}
+              errors={errors}
+              submitting={submitting}
+              onChange={change}
+              onSubmit={submit}
+              onExample={() => change(EXAMPLE_VALUES)}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          </section>
+        ) : (
+          <p>Test {phase.testId} started.</p>
+        )}
       </main>
     </div>
   );

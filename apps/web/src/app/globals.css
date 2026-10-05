@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  superiorAPI design tokens: a chart-recorder instrument.
+  Cool chart paper, deep indigo ink, a blue recording pen, and a red pen for
+  failures. Status colours are reserved for state and always ship with text.
+*/
+@theme {
+  --color-paper: #eef2f5;
+  --color-panel: #f8fafb;
+  --color-grid: #dbe4eb;
+  --color-rule: #c3cfd9;
+  --color-ink: #18233f;
+  --color-ink-2: #3f4b68;
+  --color-ink-3: #5a6580;
+  --color-pen: #2348d8;
+  --color-pen-deep: #1a37ae;
+  --color-pen-wash: #dfe6fb;
+  --color-fail: #d3263a;
+  --color-fail-ink: #b01e30;
+  --color-fail-wash: #fbe3e6;
+  --color-warn: #b87500;
+  --color-warn-ink: #8a5800;
+  --color-warn-wash: #fbefd9;
+  --color-good: #18805a;
+  --color-good-ink: #116446;
+  --color-good-wash: #dcf1e7;
+  --color-neutral: #7a8699;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --animate-row-in: row-in 420ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-dot-in: dot-in 360ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-pen: pen 1.6s ease-in-out infinite;
+  --animate-tick: tick 500ms ease-out;
+
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+      background-color: var(--color-pen-wash);
+    }
+    60% {
+      opacity: 1;
+      background-color: var(--color-pen-wash);
+    }
+    to {
+      transform: translateY(0);
+      background-color: transparent;
+    }
+  }
+
+  @keyframes dot-in {
+    from {
+      opacity: 0;
+      transform: scale(2.4);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes pen {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  @keyframes tick {
+    from {
+      color: var(--color-pen);
+    }
   }
 }
 
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1;
+}
+
+::selection {
+  background: var(--color-pen-wash);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-pen);
+  outline-offset: 2px;
+}
+
+/* Grid paper for chart panels: minor lines every 12px, major every 60px. */
+.chart-paper {
+  background-color: var(--color-panel);
+  background-image:
+    linear-gradient(to right, var(--color-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }
