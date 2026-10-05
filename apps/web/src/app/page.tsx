@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Banner } from "@/components/Banner";
 import { ConfigForm } from "@/components/ConfigForm";
+import { ReportView } from "@/components/report/ReportView";
 import { RunView } from "@/components/RunView";
 import { Button } from "@/components/ui";
 import { API_URL, fetchLimits, isApiError, startTest } from "@/lib/api";
@@ -175,7 +176,12 @@ export default function Home() {
             onBack={backToConfig}
           />
         ) : (
-          <p>Report for {phase.result.id}</p>
+          <ReportView
+            result={phase.result}
+            rerunning={submitting}
+            onRunAgain={() => void start(phase.request)}
+            onNewTest={backToConfig}
+          />
         )}
       </main>
     </div>

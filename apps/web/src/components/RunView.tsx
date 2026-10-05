@@ -8,6 +8,7 @@ import { useTicker } from "@/lib/hooks";
 import type { StartTestRequest, TestResult } from "@/lib/types";
 import { useTestRun } from "@/lib/useTestRun";
 import { Banner } from "./Banner";
+import { ScatterLegend } from "./charts/marks";
 import { LiveFeed } from "./live/LiveFeed";
 import { LiveProgress } from "./live/LiveProgress";
 import { LiveStripChart } from "./live/LiveStripChart";
@@ -148,7 +149,7 @@ export function RunView({ testId, request, onDone, onBack }: Props) {
             finished={finished}
             host={host}
           />
-          <Legend />
+          <ScatterLegend />
         </div>
         <LiveFeed feed={run.feed} scaleMax={feedScale} />
       </div>
@@ -175,25 +176,3 @@ function StatusLine({
   return `${mode}, ${concurrency} request${concurrency === 1 ? "" : "s"} in flight at a time.`;
 }
 
-function Legend() {
-  return (
-    <p className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-3">
-      <span className="inline-flex items-center gap-1.5">
-        <svg aria-hidden width="10" height="10"><circle cx="5" cy="5" r="4" fill="var(--color-pen)" /></svg>
-        Succeeded
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <svg aria-hidden width="10" height="10"><path d="M1.5 1.5 L8.5 8.5 M8.5 1.5 L1.5 8.5" stroke="var(--color-fail)" strokeWidth="2" strokeLinecap="round" /></svg>
-        Failed
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <svg aria-hidden width="18" height="10"><line x1="0" x2="18" y1="5" y2="5" stroke="var(--color-ink-2)" strokeWidth="1.25" /></svg>
-        P50
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <svg aria-hidden width="18" height="10"><line x1="0" x2="18" y1="5" y2="5" stroke="var(--color-ink-2)" strokeWidth="1.25" strokeDasharray="5 4" /></svg>
-        P95
-      </span>
-    </p>
-  );
-}
