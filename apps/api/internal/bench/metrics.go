@@ -150,21 +150,32 @@ func Histogram(sorted []float64) []Bucket {
 		}
 	}
 
+	// Work in integer bucket indices so float rounding (0.3/0.1 = 2.9999…)
+	// cannot produce empty, overlapping or zero-width buckets.
 	width := niceStep((hi - lo) / 10)
-	start := math.Floor(lo/width) * width
-	k := int(math.Floor((hi-start)/width)) + 1
-	end := start + float64(k)*width
+	index := func(v float64) int { return int(math.Floor(v/width + 1e-9)) }
+	edge := func(i int) float64 { return round(float64(i)*width, 2) }
+	first := index(lo)
+	k := index(hi) - first + 1
 
 	buckets := make([]Bucket, k)
 	for i := range buckets {
-		buckets[i] = Bucket{FromMs: round(start+float64(i)*width, 1), ToMs: round(start+float64(i+1)*width, 1)}
+		buckets[i] = Bucket{FromMs: edge(first + i), ToMs: edge(first + i + 1)}
 	}
-	if maxV >= end {
-		buckets = append(buckets, Bucket{FromMs: round(end, 1), ToMs: maxV})
-	}
+	overflow := 0
 	for _, v := range sorted {
-		i := int((v - start) / width)
-		buckets[min(i, len(buckets)-1)].Count++
+		if i := index(v) - first; i < k {
+			buckets[i].Count++
+		} else {
+			overflow++
+		}
+	}
+	if overflow > 0 {
+		if end := buckets[k-1].ToMs; maxV > end {
+			buckets = append(buckets, Bucket{FromMs: end, ToMs: maxV, Count: overflow})
+		} else {
+			buckets[k-1].Count += overflow
+		}
 	}
 	return buckets
 }

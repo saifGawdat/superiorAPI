@@ -111,6 +111,14 @@ func TestHistogram(t *testing.T) {
 		t.Errorf("outlier squashed the buckets: width %v", b[0].ToMs-b[0].FromMs)
 	}
 
+	// Sub-millisecond values hit float rounding at the 0.1ms bucket width.
+	for v := 0.1; v < 20; v += 0.1 {
+		x := round(v, 1)
+		checkHistogram(t, []float64{x}, Histogram([]float64{x}))
+		three := []float64{x, round(x+0.1, 1), round(x+0.3, 1)}
+		checkHistogram(t, three, Histogram(three))
+	}
+
 	same := []float64{5, 5, 5}
 	checkHistogram(t, same, Histogram(same))
 	if Histogram(nil) != nil {
