@@ -5,13 +5,13 @@ name: Go
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
     paths:
       - "apps/api/**"
       - "go.work"
       - ".github/workflows/go.yml"
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
     paths:
       - "apps/api/**"
       - "go.work"
