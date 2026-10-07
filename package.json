@@ -7,7 +7,7 @@
   "scripts": {
     "dev:web": "npm run dev -w web",
     "dev:api": "go -C apps/api run ./cmd/server",
-    "build": "go -C apps/api build ./... && npm run build -w web",
+    "build": "node api.js && go -C apps/api build ./... && npm run build -w web",
     "lint": "go -C apps/api vet ./... && npm run lint -w web",
     "test": "go -C apps/api test ./..."
   }
